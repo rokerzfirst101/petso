@@ -7,7 +7,7 @@ const {width} = Dimensions.get('window')
 const SearchWithLogo = () => {
     return (
         <View style={{padding: 20, alignItems: 'center'}}>
-            <Image source={require('../../../assets/logo.png')} style={{height: 100, width: 200}} />
+            {/* <Image source={require('../../../assets/logo.png')} style={{height: 100, width: 200}} /> */}
             <View style={{width}}>
                 <TextInput
                     dense

@@ -1,53 +1,68 @@
-import React from 'react'
-import { View, Text, FlatList, StatusBar, Dimensions, TouchableOpacity } from 'react-native'
-import { Caption, Surface, Title } from 'react-native-paper'
-import ImageCarousel from '../components/molecules/ImageCarousel'
+import React from "react";
+import { View, FlatList, StatusBar } from "react-native";
+import { Subheading, useTheme } from "react-native-paper";
+import HomeHeader from "../components/molecules/HomeHeader";
+import { PreferencesContext } from "../constants/PreferenceContext";
+import NewListingFAB from "../components/atoms/NewListingFAB";
+import { getListings } from "../requests";
+import { connect } from "react-redux";
+import HomeListingItem from "../components/molecules/HomeListingItem";
 
-const data = [
-    {
-        images: [
-            "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg?cs=srgb&dl=pexels-chevanon-photography-1108099.jpg&fm=jpg",
-            "https://images.pexels.com/photos/2253275/pexels-photo-2253275.jpeg?cs=srgb&dl=pexels-helena-lopes-2253275.jpg&fm=jpg",
-            "https://images.pexels.com/photos/97082/weimaraner-puppy-dog-snout-97082.jpeg?cs=srgb&dl=pexels-pixabay-97082.jpg&fm=jpg"
-        ]
-    },
-    {
-        images: [
-            "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg?cs=srgb&dl=pexels-chevanon-photography-1108099.jpg&fm=jpg",
-            "https://images.pexels.com/photos/2253275/pexels-photo-2253275.jpeg?cs=srgb&dl=pexels-helena-lopes-2253275.jpg&fm=jpg",
-            "https://images.pexels.com/photos/97082/weimaraner-puppy-dog-snout-97082.jpeg?cs=srgb&dl=pexels-pixabay-97082.jpg&fm=jpg"
-        ]
-    },
-    {
-        images: [
-            "https://images.pexels.com/photos/1108099/pexels-photo-1108099.jpeg?cs=srgb&dl=pexels-chevanon-photography-1108099.jpg&fm=jpg",
-            "https://images.pexels.com/photos/2253275/pexels-photo-2253275.jpeg?cs=srgb&dl=pexels-helena-lopes-2253275.jpg&fm=jpg",
-            "https://images.pexels.com/photos/97082/weimaraner-puppy-dog-snout-97082.jpeg?cs=srgb&dl=pexels-pixabay-97082.jpg&fm=jpg"
-        ]
-    }
-]
-const {width, height} = Dimensions.get('window')
 const HomeScreen = (props) => {
-    return (
-        <View style={{flex: 1, paddingTop: StatusBar.currentHeight}}>
-            <FlatList
-                data={data}
-                keyExtractor={(item, index) => index.toString()}
-                renderItem={({item, index}) => {
-                    return (
-                        <Surface style={{flex: 1, width, elevation: 4}}>
-                            <ImageCarousel images={item.images} />
-                            <Title style={{textAlign: 'center'}}>Hello</Title>
-                            <TouchableOpacity onPress={() => props.navigation.navigate("ProfileScreen")}>
-                                <Caption style={{textAlign: 'center'}}>View More</Caption>
-                            </TouchableOpacity>
-                        </Surface>
-                    )
-                }}
-                ItemSeparatorComponent={() => <View style={{marginVertical: 5}} />}
-            />
-        </View>
-    )
-}
+  React.useEffect(() => {
+    getListings(props.token)
+      .then((res) => setData(res.listings))
+      .catch((err) => console.log(err.response));
+  }, []);
 
-export default HomeScreen
+  const preference = React.useContext(PreferencesContext);
+  const [data, setData] = React.useState([]);
+  const { colors } = useTheme();
+  return (
+    <View
+      style={{
+        flex: 1,
+        paddingTop: StatusBar.currentHeight,
+        backgroundColor: preference.isThemeDark ? "#121212" : "white",
+      }}
+    >
+      <View style={{ borderWidth: 1 }} />
+      <HomeHeader title="Dogs" navigation={props.navigation} />
+      <FlatList
+        data={data}
+        style={{ padding: 10 }}
+        keyExtractor={(item, index) => index.toString()}
+        ListEmptyComponent={() => {
+          return (
+            <View
+              style={{
+                flex: 1,
+                alignItems: "center",
+                marginTop: "60%",
+                opacity: 0.5,
+              }}
+            >
+              <Subheading>Nothing to show.</Subheading>
+            </View>
+          );
+        }}
+        renderItem={({ item, index }) => {
+          return <HomeListingItem userId={props.user._id} item={item} />;
+        }}
+        ItemSeparatorComponent={() => <View style={{ marginVertical: 5 }} />}
+      />
+      <NewListingFAB
+        onPress={() => props.navigation.navigate("NewListingScreen")}
+      />
+    </View>
+  );
+};
+
+const mapStateToProps = (state) => {
+  return {
+    user: state.userReducer.user,
+    token: state.userReducer.token,
+  };
+};
+
+export default connect(mapStateToProps)(HomeScreen);

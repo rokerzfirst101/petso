@@ -1,8 +1,4 @@
-import React, { useState } from "react";
-import MainStack from "./src/navigation/MainStack";
-import { Asset } from "expo-asset";
-import AppLoading from "expo-app-loading";
-import * as SplashScreen from "expo-splash-screen";
+import React from "react";
 import Constants from "expo-constants";
 import { View, StyleSheet, Animated, SafeAreaView } from "react-native";
 import {
@@ -14,11 +10,11 @@ import {
 import { Staatliches_400Regular } from "@expo-google-fonts/staatliches";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Font from "expo-font";
-import { connect, Provider } from "react-redux";
-import configureStore from "./src/redux/store";
-import { signIn } from "./src/redux/actions/user";
+import { connect } from "react-redux";
+import { signIn } from "../../redux/actions/user";
+import { reject } from "core-js/fn/promise";
 
-const customFonts = {
+let customFonts = {
   OpenSans_300Light,
   OpenSans_400Regular,
   OpenSans_700Bold,
@@ -26,55 +22,7 @@ const customFonts = {
   Staatliches_400Regular,
 };
 
-SplashScreen.preventAutoHideAsync().catch(() => {});
-
-const store = configureStore();
-
-export default function App() {
-  const [user, setUser] = useState();
-  const [token, setToken] = useState();
-  return (
-    <Provider store={store}>
-      <AnimatedAppLoader
-        setUser={setUser}
-        setToken={setToken}
-        image="https://pbs.twimg.com/media/EuZ5hHFVkAYXaVa?format=png&name=240x240"
-      >
-        <MainStack user={user} token={token} />
-      </AnimatedAppLoader>
-    </Provider>
-  );
-}
-
-function AnimatedAppLoader({ children, image, setUser, setToken }) {
-  const [isSplashReady, setSplashReady] = React.useState(false);
-
-  const startAsync = React.useMemo(
-    () => () => Asset.fromURI(image).downloadAsync(),
-    [image]
-  );
-
-  const onFinish = React.useMemo(() => setSplashReady(true), []);
-
-  if (!isSplashReady) {
-    return (
-      <AppLoading
-        autoHideSplash={false}
-        startAsync={startAsync}
-        onError={console.error}
-        onFinish={onFinish}
-      />
-    );
-  }
-
-  return (
-    <AnimatedSplashScreen setUser={setUser} setToken={setToken} image={image}>
-      {children}
-    </AnimatedSplashScreen>
-  );
-}
-
-const AnimatedSplashScreen = ({ children, image, setUser, setToken }) => {
+const AnimatedSplashScreen = ({ children, image, signInUser }) => {
   const animation = React.useMemo(() => new Animated.Value(1), []);
   const [isAppReady, setAppReady] = React.useState(false);
   const [isSplashAnimationComplete, setAnimationComplete] =
@@ -93,12 +41,10 @@ const AnimatedSplashScreen = ({ children, image, setUser, setToken }) => {
   const loadUserData = () =>
     new Promise((resolve, reject) => {
       AsyncStorage.getItem("@User")
-        .then((userString) => {
-          AsyncStorage.getItem("@Token").then((token) => {
-            setUser(JSON.parse(userString));
-            setToken(JSON.parse(token));
-            resolve();
-          });
+        .then((data) => {
+          const user = JSON.parse(userString);
+          signInUser(user);
+          resolve();
         })
         .catch((err) => reject(err));
     });
@@ -106,7 +52,7 @@ const AnimatedSplashScreen = ({ children, image, setUser, setToken }) => {
   const onImageLoaded = React.useMemo(() => async () => {
     try {
       await SplashScreen.hideAsync();
-      await Promise.all([Font.loadAsync(customFonts), loadUserData()]);
+      await Promise.all([Font.loadAsync(customFonts), loadUserData]);
     } catch (e) {
       //handle errors
     } finally {
@@ -148,3 +94,21 @@ const AnimatedSplashScreen = ({ children, image, setUser, setToken }) => {
     </View>
   );
 };
+
+const mapStateToProps = (state) => {
+  return {
+    user: state.userReducer.user,
+    signedIn: state.userReducer.signedIn,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    signInUser: (user) => dispatch(signIn(user)),
+  };
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(AnimatedSplashScreen);
