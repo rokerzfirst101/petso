@@ -2,8 +2,7 @@ import React from "react";
 import {
   KeyboardAvoidingView,
   Platform,
-  StyleSheet,
-  Text,
+  ToastAndroid,
   View,
 } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
@@ -18,42 +17,79 @@ import {
 import { PreferencesContext } from "../constants/PreferenceContext";
 import * as ImagePicker from "expo-image-picker";
 import { register } from "../requests";
+import { connect } from "react-redux";
+import { signIn } from "../redux/actions/user";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const RegisterScreen = () => {
+const RegisterScreen = (props) => {
   const { colors } = useTheme();
   const preference = React.useContext(PreferencesContext);
 
-  const [name, setName] = React.useState("Rakshit Singh");
-  const [email, setEmail] = React.useState("rakshit.lko@gmail.com");
-  const [phone, setPhone] = React.useState("7084552191");
-  const [password, setPassword] = React.useState("226012rak");
-  const [password2, setPassword2] = React.useState("226012rak");
+  const [name, setName] = React.useState("");
+  const [email, setEmail] = React.useState("");
+  const [phone, setPhone] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [password2, setPassword2] = React.useState("");
   const [profilePicture, setProfilePicture] = React.useState("");
 
   const [hidePassword, setHidePassword] = React.useState(true);
   const [hidePassword2, setHidePassword2] = React.useState(true);
 
+  const [validate, setValidate] = React.useState(false);
+
   const [isLoading, setIsLoading] = React.useState(false);
 
+  const nameError = () => validate && name === "";
+  const emailError = () => validate && email === "";
+  const phoneError = () => validate && phone === "";
+  const passwordError = () => validate && password === "";
+  const password2Error = () =>
+    validate && password2 === "" && password2 !== password;
+
+  const validateData = () => {
+    setValidate(true);
+    return (
+      nameError() &&
+      emailError() &&
+      phoneError() &&
+      passwordError() &&
+      password2Error()
+    );
+  };
+
   const submitForm = () => {
+    if (validateData()) return;
+    setIsLoading(true);
     let formData = new FormData();
-    let localUri = profilePicture.uri;
-    let filename = localUri.split("/").pop();
-    let match = /\.(\w+)$/.exec(filename);
-    let type = match ? `image/${match[1]}` : `image`;
+    if (profilePicture) {
+      let localUri = profilePicture.uri;
+      let filename = localUri.split("/").pop();
+      let match = /\.(\w+)$/.exec(filename);
+      let type = match ? `image/${match[1]}` : `image`;
+      formData.append("avatar", {
+        uri: profilePicture.uri,
+        name: filename,
+        type,
+      });
+    }
     formData.append("email", email);
     formData.append("password", password);
     formData.append("name", name);
     formData.append("phone", phone);
     formData.append("category", "default");
-    formData.append("avatar", {
-      uri: profilePicture.uri,
-      name: filename,
-      type,
-    });
     register(formData)
-      .then((res) => console.log(res))
-      .catch((err) => console.log(err));
+      .then((res) => {
+        console.log(res);
+        props.signInUser(res.user, res.accessToken);
+        AsyncStorage.setItem("@User", JSON.stringify(res.user));
+        AsyncStorage.setItem("@Token", JSON.stringify(res.accessToken));
+        props.navigation.navigate("CategoryScreen");
+      })
+      .catch((err) => {
+        console.log(err);
+        setIsLoading(false);
+        ToastAndroid.show("An error occured", ToastAndroid.SHORT);
+      });
   };
 
   React.useEffect(() => {
@@ -101,16 +137,11 @@ const RegisterScreen = () => {
           onPress={pickImage}
           style={{ alignItems: "center", marginVertical: 30 }}
         >
-          <Avatar.Image
-            size={100}
-            source={
-              profilePicture != ""
-                ? {
-                    uri: profilePicture.uri,
-                  }
-                : undefined
-            }
-          />
+          {profilePicture != "" ? (
+            <Avatar.Image size={100} source={{ uri: profilePicture.uri }} />
+          ) : (
+            <Avatar.Icon size={100} icon="camera-plus-outline" />
+          )}
         </TouchableOpacity>
         <TextInput
           style={{
@@ -121,6 +152,7 @@ const RegisterScreen = () => {
           dense
           value={name}
           onChangeText={setName}
+          error={nameError()}
           left={<TextInput.Icon name="account" color={colors.accent} />}
         />
         <TextInput
@@ -132,6 +164,7 @@ const RegisterScreen = () => {
           dense
           value={email}
           onChangeText={setEmail}
+          error={emailError()}
           left={<TextInput.Icon name="at" color={colors.accent} />}
         />
         <TextInput
@@ -143,6 +176,7 @@ const RegisterScreen = () => {
           dense
           value={phone}
           onChangeText={setPhone}
+          error={phoneError()}
           left={<TextInput.Icon name="phone" color={colors.accent} />}
         />
         <TextInput
@@ -155,6 +189,7 @@ const RegisterScreen = () => {
           value={password}
           onChangeText={setPassword}
           secureTextEntry={hidePassword}
+          error={passwordError()}
           left={<TextInput.Icon name="lock" color={colors.accent} />}
           right={
             !hidePassword ? (
@@ -182,6 +217,7 @@ const RegisterScreen = () => {
           value={password2}
           onChangeText={setPassword2}
           secureTextEntry={hidePassword2}
+          error={password2Error()}
           left={<TextInput.Icon name="lock" color={colors.accent} />}
           right={
             !hidePassword2 ? (
@@ -207,4 +243,10 @@ const RegisterScreen = () => {
   );
 };
 
-export default RegisterScreen;
+const mapDispatchToProps = (dispatch) => {
+  return {
+    signInUser: (user, token) => dispatch(signIn(user, token)),
+  };
+};
+
+export default connect(null, mapDispatchToProps)(RegisterScreen);

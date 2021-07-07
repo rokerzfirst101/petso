@@ -29,14 +29,25 @@ const LoginScreen = (props) => {
   const [isLoading, setIsLoading] = React.useState(false);
   const [loop, setLoop] = React.useState(true);
 
+  const validateEmail = (email) => {
+    const re =
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
+  };
+
   const submitForm = () => {
-    if (email === "" || password === "") {
+    if (!validateEmail(email)) {
+      ToastAndroid.show("Enter proper email.", ToastAndroid.SHORT);
+      return;
+    }
+    if (password === "") {
       ToastAndroid.show(
         "Please enter the email or password",
         ToastAndroid.SHORT
       );
       return;
     }
+
     animationRef.current.play(50, 110);
     const formData = new FormData();
     formData.append("email", email);
@@ -50,7 +61,7 @@ const LoginScreen = (props) => {
         animationRef.current.play(110, 200);
       })
       .catch((err) => {
-        ToastAndroid.show("An error occured.", ToastAndroid.SHORT);
+        ToastAndroid.show("Incorrect email or password.", ToastAndroid.SHORT);
         animationRef.current.play(0, 0);
       });
   };
@@ -103,11 +114,11 @@ const LoginScreen = (props) => {
             }
           />
         </View>
-        <View style={{ alignItems: "flex-end", paddingHorizontal: 12 }}>
+        {/* <View style={{ alignItems: "flex-end", paddingHorizontal: 12 }}>
           <Caption style={{ color: colors.accent }}>Forgot Password?</Caption>
-        </View>
+        </View> */}
         <TouchableOpacity
-          style={{ height: 80, marginTop: 100 }}
+          style={{ height: 80, marginTop: 50 }}
           onPress={() => {
             // animationRef.current.play(50, 110);
             // setTimeout(() => {
@@ -125,10 +136,10 @@ const LoginScreen = (props) => {
           />
         </TouchableOpacity>
         <TouchableOpacity
-          style={{ alignSelf: "center" }}
+          style={{ alignSelf: "center", marginTop: 50 }}
           onPress={() => props.navigation.navigate("Register")}
         >
-          <Subheading>Don't have an account? Signup</Subheading>
+          <Caption>Don't have an account? Signup</Caption>
         </TouchableOpacity>
       </View>
     </DismissKeyboardView>

@@ -1,4 +1,4 @@
-import { SET_SIGNED_IN, SET_SIGNED_OUT } from "../actions/types";
+import { SET_SIGNED_IN, SET_SIGNED_OUT, UPDATE_USER } from "../actions/types";
 
 const initialState = {
   user: undefined,
@@ -18,6 +18,11 @@ const userReducer = (state = initialState, action) => {
       return {
         user: undefined,
         signedIn: false,
+      };
+    case UPDATE_USER:
+      return {
+        ...state,
+        user: action.user,
       };
     default:
       return state;

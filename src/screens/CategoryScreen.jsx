@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   StatusBar,
 } from "react-native";
-import { Surface, Title } from "react-native-paper";
+import { Surface, Title, Subheading } from "react-native-paper";
 import SearchWithLogo from "../components/molecules/SearchWithLogo";
 import { PreferencesContext } from "../constants/PreferenceContext";
 import { getRandomColor } from "../constants/RandomColors";
@@ -47,10 +47,12 @@ const CategoryScreen = (props) => {
     <View
       style={{
         flex: 1,
+        alignItems: "center",
+        marginTop: StatusBar.currentHeight + 20,
         backgroundColor: preference.isThemeDark ? "#121212" : "#F4F5F7",
       }}
     >
-      <FlatList
+      {/* <FlatList
         style={{ marginTop: StatusBar.currentHeight }}
         numColumns={2}
         data={data}
@@ -114,7 +116,59 @@ const CategoryScreen = (props) => {
         }}
         ItemSeparatorComponent={() => <View style={{ margin: 7.5 }} />}
         contentContainerStyle={{ alignItems: "center", paddingVertical: 15 }}
-      />
+      /> */}
+      <Title
+        style={{
+          fontFamily: "Staatliches_400Regular",
+          fontSize: 28,
+          marginBottom: 15,
+        }}
+      >
+        TELL US WHAT YOU LIKE
+      </Title>
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={() => props.navigation.replace("Dashboard")}
+      >
+        <Surface
+          style={{
+            width: width / 1.5,
+            marginRight: 10,
+            marginLeft: 10,
+            borderRadius: 30,
+            elevation: 4,
+            marginTop: 20,
+          }}
+        >
+          <View
+            style={{
+              width: width / 1.5,
+              height: 400,
+              borderRadius: 30,
+            }}
+          >
+            <Image
+              source={require("../../assets/dog-category.jpg")}
+              style={{
+                height: 400,
+                width: width / 1.5,
+                borderRadius: 30,
+              }}
+            />
+            <LinearGradient
+              start={{ x: 0, y: 0 }}
+              colors={["#3793b380", "#3793b366"]}
+              style={{
+                position: "absolute",
+                height: 400,
+                width: width / 1.5,
+                borderRadius: 30,
+              }}
+            />
+          </View>
+        </Surface>
+      </TouchableOpacity>
+      <Subheading style={{ marginTop: 50 }}>More coming soon...</Subheading>
     </View>
   );
 };

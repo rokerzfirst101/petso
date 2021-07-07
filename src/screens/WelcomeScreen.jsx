@@ -20,8 +20,8 @@ import CustomBottomSheetBackdrop from "../components/molecules/CustomBottomSheet
 const { width, height } = Dimensions.get("window");
 const WelcomeScreen = (props) => {
   const bottomSheetModalRef = React.useRef(null);
-
-  const snapPoints = React.useMemo(() => [-1, "75%"], []);
+  const [modalState, setModalState] = React.useState(0);
+  const snapPoints = React.useMemo(() => [-1, "65%"], []);
 
   const showModal = React.useCallback(() => {
     bottomSheetModalRef.current.present();
@@ -29,6 +29,8 @@ const WelcomeScreen = (props) => {
 
   const handleSheetChanges = React.useCallback((index) => {
     console.log("handleSheetChanges", index);
+    if (index == 1) setModalState(1);
+    else setModalState(0);
   });
 
   return (
@@ -52,26 +54,28 @@ const WelcomeScreen = (props) => {
             source={require("../../assets/logo.png")}
           />
           <View style={{ width: 250 }}>
-            <Button
-              labelStyle={{
-                fontSize: 28,
-                fontFamily: "Staatliches_400Regular",
-                color: "#1F456E",
-              }}
-              style={{
-                height: 60,
-                justifyContent: "center",
-                borderRadius: 30,
-                borderWidth: 2,
-                backgroundColor: "rgba(255, 255, 255, 0.8)",
-                elevation: 4,
-                zIndex: 0,
-              }}
-              mode="contained"
-              onPress={showModal}
-            >
-              Get Started
-            </Button>
+            {modalState == 0 ? (
+              <Button
+                labelStyle={{
+                  fontSize: 28,
+                  fontFamily: "Staatliches_400Regular",
+                  color: "#1F456E",
+                }}
+                style={{
+                  height: 60,
+                  justifyContent: "center",
+                  borderRadius: 30,
+                  borderWidth: 2,
+                  backgroundColor: "rgba(255, 255, 255, 0.8)",
+                  elevation: 4,
+                  zIndex: 0,
+                }}
+                mode="contained"
+                onPress={showModal}
+              >
+                Get Started
+              </Button>
+            ) : null}
           </View>
         </View>
         <BottomSheetModal
@@ -80,7 +84,6 @@ const WelcomeScreen = (props) => {
           snapPoints={snapPoints}
           onChange={handleSheetChanges}
           backgroundComponent={CustomBottomSheetBackground}
-          backdropComponent={CustomBottomSheetBackdrop}
         >
           <LoginScreen navigation={props.navigation} />
         </BottomSheetModal>

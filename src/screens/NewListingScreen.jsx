@@ -6,10 +6,11 @@ import {
   Image,
   KeyboardAvoidingView,
   Keyboard,
+  ToastAndroid,
 } from "react-native";
-import { Button, TextInput } from "react-native-paper";
+import { Button, Portal, Modal, TextInput } from "react-native-paper";
 import { Subheading, Title, useTheme } from "react-native-paper";
-import { Feather } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import * as ImagePicker from "expo-image-picker";
 import { useEffect } from "react";
@@ -17,14 +18,15 @@ import NewListingCarousel from "../components/molecules/NewListingCarousel";
 import { newListing } from "../requests";
 import { connect } from "react-redux";
 
-const NewListingScreen = ({ token }) => {
+const NewListingScreen = ({ navigation, token }) => {
   const { colors } = useTheme();
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [price, setPrice] = useState("");
-  const [contact, setContact] = useState("");
   const [images, setImages] = useState([]);
   const [keyboard, setKeyboard] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -49,6 +51,11 @@ const NewListingScreen = ({ token }) => {
   const _keyboardDidHide = () => setKeyboard(false);
 
   const createListing = () => {
+    if (title === "" || message === "" || price === "" || images.length === 0) {
+      ToastAndroid.show("Fill in the details", ToastAndroid.SHORT);
+      return;
+    }
+    setIsLoading(true);
     const formData = new FormData();
     for (var i = 0; i < images.length; i++) {
       let localUri = images[i].uri;
@@ -64,10 +71,19 @@ const NewListingScreen = ({ token }) => {
     formData.append("title", title);
     formData.append("message", message);
     formData.append("price", price);
-    formData.append("contact", contact);
     newListing(token, formData)
-      .then((res) => console.log(res))
-      .catch((err) => console.log(err));
+      .then((res) => {
+        setIsLoading(false);
+        setModalVisible(true);
+        setTimeout(() => {
+          setModalVisible(false);
+          navigation.pop();
+        }, 1000);
+      })
+      .catch((err) => {
+        ToastAndroid.show("An error occured.", ToastAndroid.SHORT);
+        setIsLoading(false);
+      });
   };
 
   const popImage = () => {
@@ -130,17 +146,33 @@ const NewListingScreen = ({ token }) => {
           placeholder="Message"
         />
         <TextInput value={price} onChangeText={setPrice} placeholder="Price" />
-        <TextInput
-          value={contact}
-          onChangeText={setContact}
-          placeholder="Contact"
-        />
       </View>
       {!keyboard ? (
-        <Button style={{ marginBottom: 20 }} onPress={createListing}>
+        <Button
+          style={{ marginBottom: 20 }}
+          loading={isLoading}
+          onPress={createListing}
+        >
           Submit
         </Button>
       ) : null}
+      <Portal>
+        <Modal
+          visible={modalVisible}
+          contentContainerStyle={{
+            marginHorizontal: 10,
+            alignItems: "center",
+            backgroundColor: "green",
+            padding: 10,
+            flexDirection: "row",
+          }}
+        >
+          <Ionicons name="checkmark-circle-outline" size={24} color="white" />
+          <Subheading style={{ marginStart: 10 }}>
+            Listing posted successfully.
+          </Subheading>
+        </Modal>
+      </Portal>
     </KeyboardAvoidingView>
   );
 };
