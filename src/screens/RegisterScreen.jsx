@@ -27,7 +27,7 @@ const RegisterScreen = (props) => {
 
   const [name, setName] = React.useState("");
   const [email, setEmail] = React.useState("");
-  const [phone, setPhone] = React.useState("");
+  const [phone, setPhone] = React.useState(props.route.params.phone ? props.route.params.phone :  "");
   const [password, setPassword] = React.useState("");
   const [password2, setPassword2] = React.useState("");
   const [profilePicture, setProfilePicture] = React.useState("");
@@ -86,7 +86,7 @@ const RegisterScreen = (props) => {
         props.navigation.navigate("CategoryScreen");
       })
       .catch((err) => {
-        console.log(err);
+        console.log(err.response);
         setIsLoading(false);
         ToastAndroid.show("An error occured", ToastAndroid.SHORT);
       });
@@ -173,6 +173,7 @@ const RegisterScreen = (props) => {
             backgroundColor: preference.isThemeDark ? null : "white",
           }}
           placeholder="Phone Number"
+          editable={props.route.params.phone ? false : true}
           dense
           value={phone}
           onChangeText={setPhone}

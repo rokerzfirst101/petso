@@ -15,21 +15,20 @@ import {
   BottomSheetModalProvider,
 } from "@gorhom/bottom-sheet";
 import CustomBottomSheetBackground from "../components/molecules/CustomBottomSheetBackground";
-import CustomBottomSheetBackdrop from "../components/molecules/CustomBottomSheetBackdrop";
+import CustomBottomSheetHandle from "../components/molecules/CustomBottomSheetHandle";
 
 const { width, height } = Dimensions.get("window");
 const WelcomeScreen = (props) => {
   const bottomSheetModalRef = React.useRef(null);
   const [modalState, setModalState] = React.useState(0);
-  const snapPoints = React.useMemo(() => [-1, "65%"], []);
+  const snapPoints = React.useMemo(() => ["65%"], []);
 
   const showModal = React.useCallback(() => {
     bottomSheetModalRef.current.present();
   }, []);
 
   const handleSheetChanges = React.useCallback((index) => {
-    console.log("handleSheetChanges", index);
-    if (index == 1) setModalState(1);
+    if (index == 0) setModalState(1);
     else setModalState(0);
   });
 
@@ -68,7 +67,6 @@ const WelcomeScreen = (props) => {
                   borderWidth: 2,
                   backgroundColor: "rgba(255, 255, 255, 0.8)",
                   elevation: 4,
-                  zIndex: 0,
                 }}
                 mode="contained"
                 onPress={showModal}
@@ -80,9 +78,10 @@ const WelcomeScreen = (props) => {
         </View>
         <BottomSheetModal
           ref={bottomSheetModalRef}
-          index={1}
+          index={0}
           snapPoints={snapPoints}
           onChange={handleSheetChanges}
+          handleComponent={CustomBottomSheetHandle}
           backgroundComponent={CustomBottomSheetBackground}
         >
           <LoginScreen navigation={props.navigation} />

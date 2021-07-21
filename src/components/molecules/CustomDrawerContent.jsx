@@ -8,11 +8,11 @@ import {
 import {
   Caption,
   Title,
-  Switch,
+  Surface,
   useTheme,
   Subheading,
 } from "react-native-paper";
-import { AntDesign, Feather } from "@expo/vector-icons";
+import { AntDesign, Feather, FontAwesome5 } from "@expo/vector-icons";
 import { PreferencesContext } from "../../constants/PreferenceContext";
 import { connect } from "react-redux";
 import { baseUrl } from "../../requests";
@@ -22,7 +22,6 @@ const value = 4;
 const CustomDrawerContent = (props) => {
   const { colors } = useTheme();
   const preference = React.useContext(PreferencesContext);
-  const [isDark, setIsDark] = React.useState(preference.isThemeDark);
   return (
     <DrawerContentScrollView
       {...props}
@@ -31,14 +30,17 @@ const CustomDrawerContent = (props) => {
       }}
     >
       <View style={{ flex: 1, padding: 8, paddingHorizontal: 16 }}>
-        <View
+        <Surface
           style={{
             flexDirection: "row",
             alignItems: "center",
-            backgroundColor: colors.surface,
+            backgroundColor: preference.isThemeDark
+              ? colors.surface
+              : colors.accent,
             borderRadius: 25,
             padding: 15,
             paddingTop: 5,
+            elevation: 3,
           }}
         >
           <Image
@@ -48,10 +50,10 @@ const CustomDrawerContent = (props) => {
             style={{ height: 60, width: 60, borderRadius: 30, marginTop: 8 }}
           />
           <View style={{ marginStart: 10 }}>
-            <Title style={{ fontSize: 18, color: colors.accent }}>
+            <Title style={{ fontSize: 18, color: colors.onSurface }}>
               {props.user.name}
             </Title>
-            <Caption style={{ color: colors.accent, marginTop: -4 }}>
+            <Caption style={{ color: colors.onSurface, marginTop: -4 }}>
               {props.user.category}
             </Caption>
             <View style={{ flexDirection: "row" }}>
@@ -62,13 +64,13 @@ const CustomDrawerContent = (props) => {
                     style={{ marginStart: 1.5 }}
                     name="star"
                     size={14}
-                    color={colors.accent}
+                    color={colors.onSurface}
                   />
                 );
               })}
             </View>
           </View>
-        </View>
+        </Surface>
       </View>
       <View
         style={{
@@ -80,13 +82,32 @@ const CustomDrawerContent = (props) => {
       />
       <View style={{ paddingHorizontal: 12 }}>
         <DrawerItemList {...props} />
-        <DrawerItem
-          icon={() => (
-            <Feather name="settings" size={20} color={colors.dark100} />
-          )}
-          label="Settings"
-          onPress={() => props.navigation.navigate("SettingsScreen")}
-        />
+        <View style={{ paddingHorizontal: 5 }}>
+          <DrawerItem
+            icon={() => (
+              <FontAwesome5 name="dog" size={20} color={colors.dark100} />
+            )}
+            labelStyle={{ marginStart: -12 }}
+            label="Change Category"
+            onPress={() => props.navigation.navigate("CategoryScreen")}
+          />
+          <DrawerItem
+            icon={() => (
+              <FontAwesome5 name="store" size={18} color={colors.dark100} />
+            )}
+            labelStyle={{ marginStart: -12 }}
+            label="Bookmarked"
+            onPress={() => props.navigation.navigate("BookmarkScreen")}
+          />
+          <DrawerItem
+            icon={() => (
+              <Feather name="settings" size={20} color={colors.dark100} />
+            )}
+            labelStyle={{ marginStart: -12 }}
+            label="Settings"
+            onPress={() => props.navigation.navigate("SettingsScreen")}
+          />
+        </View>
       </View>
       <View
         style={{

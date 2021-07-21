@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// export const baseUrl = "http://10.0.2.2:8080/";
-export const baseUrl = "http://103.12.132.104:8080/";
+export const baseUrl = "http://10.0.2.2:8080/";
+// export const baseUrl = "https://petso.in/";
 
 axios.defaults.baseURL = baseUrl;
 

@@ -35,22 +35,19 @@ export default function App() {
   const [token, setToken] = useState();
   return (
     <Provider store={store}>
-      <AnimatedAppLoader
-        setUser={setUser}
-        setToken={setToken}
-        image="https://pbs.twimg.com/media/EuZ5hHFVkAYXaVa?format=png&name=240x240"
-      >
+      <AnimatedAppLoader setUser={setUser} setToken={setToken}>
         <MainStack user={user} token={token} />
       </AnimatedAppLoader>
     </Provider>
   );
 }
 
-function AnimatedAppLoader({ children, image, setUser, setToken }) {
+function AnimatedAppLoader({ children, setUser, setToken }) {
   const [isSplashReady, setSplashReady] = React.useState(false);
-
+  const image = require("./assets/logo.png");
+  const background = require("./assets/background.jpg");
   const startAsync = React.useMemo(
-    () => () => Asset.fromURI(image).downloadAsync(),
+    () => Asset.loadAsync([image, background]),
     [image]
   );
 
@@ -139,7 +136,7 @@ const AnimatedSplashScreen = ({ children, image, setUser, setToken }) => {
                 },
               ],
             }}
-            source={{ uri: image }}
+            source={image}
             onLoadEnd={onImageLoaded}
             fadeDuration={0}
           />

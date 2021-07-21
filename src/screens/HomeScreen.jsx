@@ -7,6 +7,7 @@ import NewListingFAB from "../components/atoms/NewListingFAB";
 import { getTrending, getLatest } from "../requests";
 import { connect } from "react-redux";
 import HomeListingItem from "../components/molecules/HomeListingItem";
+import { useFocusEffect } from "@react-navigation/native";
 
 const HomeScreen = (props) => {
   const preference = React.useContext(PreferencesContext);
@@ -24,33 +25,35 @@ const HomeScreen = (props) => {
     }
   };
 
-  React.useEffect(() => {
-    setData([]);
-    setIsLoading(true);
-    if (tab === "trending") {
-      getTrending(props.token)
-        .then((res) => {
-          setOriginalData(res.listings);
-          setData(res.listings);
-          setIsLoading(false);
-        })
-        .catch((err) => {
-          setIsLoading(false);
-          console.log(err.response);
-        });
-    } else if (tab === "latest") {
-      getLatest(props.token)
-        .then((res) => {
-          setOriginalData(res.listings);
-          setData(res.listings);
-          setIsLoading(false);
-        })
-        .catch((err) => {
-          setIsLoading(false);
-          console.log(err.response);
-        });
-    }
-  }, [tab]);
+  useFocusEffect(
+    React.useCallback(() => {
+      setData([]);
+      setIsLoading(true);
+      if (tab === "trending") {
+        getTrending(props.token)
+          .then((res) => {
+            setOriginalData(res.listings);
+            setData(res.listings);
+            setIsLoading(false);
+          })
+          .catch((err) => {
+            setIsLoading(false);
+            console.log(err.response);
+          });
+      } else if (tab === "latest") {
+        getLatest(props.token)
+          .then((res) => {
+            setOriginalData(res.listings);
+            setData(res.listings);
+            setIsLoading(false);
+          })
+          .catch((err) => {
+            setIsLoading(false);
+            console.log(err.response);
+          });
+      }
+    }, [tab])
+  );
 
   const { colors } = useTheme();
   return (

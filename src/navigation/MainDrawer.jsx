@@ -1,6 +1,5 @@
 import React from "react";
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import MainTab from "./MainTab";
 import CustomDrawerContent from "../components/molecules/CustomDrawerContent";
 import { SafeAreaView } from "react-native";
 import { useTheme } from "react-native-paper";
@@ -8,42 +7,25 @@ import { PreferencesContext } from "../constants/PreferenceContext";
 import { AntDesign, Feather, FontAwesome5 } from "@expo/vector-icons";
 import HomeScreen from "../screens/HomeScreen";
 import SettingsScreen from "../screens/SettingsScreen";
+import BookmarkScreen from "../screens/BookmarkScreen";
+import { createMaterialBottomTabNavigator } from "@react-navigation/material-bottom-tabs";
 
-const Drawer = createDrawerNavigator();
+const Tab = createMaterialBottomTabNavigator();
 
 const MainDrawer = () => {
   const { colors } = useTheme();
   const preference = React.useContext(PreferencesContext);
 
   const returnIconColor = (focused) => {
+    if (!preference.isThemeDark && focused) return "white";
     if (focused) return colors.accent;
     else return colors.dark100;
   };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <Drawer.Navigator
-        drawerType="front"
-        drawerContentOptions={{
-          labelStyle: {
-            marginStart: -10,
-          },
-          itemStyle: {
-            marginVertical: 5,
-            borderRadius: 20,
-            paddingHorizontal: 5,
-          },
-          inactiveTintColor: preference.isThemeDark
-            ? colors.light100
-            : colors.dark100,
-          activeTintColor: colors.accent,
-          activeBackgroundColor: preference.isThemeDark
-            ? colors.dark100
-            : "white",
-        }}
-        drawerContent={(props) => <CustomDrawerContent {...props} />}
-      >
-        <Drawer.Screen
+      <Tab.Navigator>
+        <Tab.Screen
           options={{
             drawerIcon: ({ focused }) => (
               <AntDesign
@@ -56,7 +38,7 @@ const MainDrawer = () => {
           name="Home"
           component={HomeScreen}
         />
-        <Drawer.Screen
+        <Tab.Screen
           options={{
             drawerIcon: ({ focused }) => (
               <FontAwesome5
@@ -66,36 +48,10 @@ const MainDrawer = () => {
               />
             ),
           }}
-          name="Listings"
-          component={MainTab}
+          name="Bookmarked"
+          component={BookmarkScreen}
         />
-        <Drawer.Screen
-          options={{
-            drawerIcon: ({ focused }) => (
-              <Feather
-                name="settings"
-                size={20}
-                color={returnIconColor(focused)}
-              />
-            ),
-          }}
-          name="Settings"
-          component={SettingsScreen}
-        />
-        <Drawer.Screen
-          options={{
-            drawerIcon: ({ focused }) => (
-              <Feather
-                name="trending-up"
-                size={20}
-                color={returnIconColor(focused)}
-              />
-            ),
-          }}
-          name="Trending"
-          component={MainTab}
-        />
-      </Drawer.Navigator>
+      </Tab.Navigator>
     </SafeAreaView>
   );
 };

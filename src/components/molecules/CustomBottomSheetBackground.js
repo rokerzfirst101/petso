@@ -1,18 +1,16 @@
-import React, { useMemo } from "react";
+import React, { useContext, useMemo } from "react";
 import { BottomSheetBackgroundProps } from "@gorhom/bottom-sheet";
 import Animated, {
   useAnimatedStyle,
   interpolateColor,
 } from "react-native-reanimated";
 import { useTheme } from "react-native-paper";
+import { PreferencesContext } from "../../constants/PreferenceContext";
 const CustomBottomSheetBackground = ({ style, animatedIndex }) => {
   const { colors } = useTheme();
+  const preference = useContext(PreferencesContext);
   const containerAnimatedStyle = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(
-      animatedIndex.value,
-      [0, 1],
-      ["#ffffff", colors.background]
-    ),
+    backgroundColor: preference.isThemeDark ? colors.background : "white",
     borderRadius: 20,
   }));
   const containerStyle = useMemo(

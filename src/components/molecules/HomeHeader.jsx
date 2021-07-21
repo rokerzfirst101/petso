@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  StyleSheet,
-  Text,
   View,
+  StyleSheet,
   TextInput,
   TouchableOpacity,
-  TouchableWithoutFeedback,
+  StatusBar,
+  Image
 } from "react-native";
 import { Subheading, Title, useTheme } from "react-native-paper";
 import {
@@ -15,11 +15,14 @@ import {
   MaterialCommunityIcons,
   MaterialIcons,
 } from "@expo/vector-icons";
-import MenuSVG from "../MenuSVG";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const HomeHeader = (props) => {
   const { colors } = useTheme();
-  const { search, setSearch } = useState();
+  const logout = () => {
+    AsyncStorage.clear();
+  }
+
   return (
     <View
       style={{
@@ -34,28 +37,31 @@ const HomeHeader = (props) => {
     >
       <View
         style={{
+          marginTop: StatusBar.currentHeight,
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: 8,
+          paddingVertical: 8,
+          marginHorizontal: 16
         }}
       >
         <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <TouchableOpacity onPress={() => props.navigation.toggleDrawer()}>
-            <MenuSVG color={colors.light300} height={20} width={20} />
-          </TouchableOpacity>
-          <Title style={{ marginStart: 16, color: "white" }}>
-            {props.title}
+          <Title
+            style={{
+              color: "white",
+              fontFamily: "Staatliches_400Regular",
+              letterSpacing: 1.5,
+            }}
+          >
+            PETSO
           </Title>
         </View>
-        <View style={{ flexDirection: "row" }}>
+        <View style={{ flexDirection: "row", alignItems: 'center' }}>
           <Feather name="bell" size={20} color={colors.light300} />
-          <MaterialIcons
-            style={{ marginStart: 15 }}
-            name="history"
-            size={22}
-            color={colors.light300}
-          />
+          <TouchableOpacity onPress={() => props.navigation.navigate("ProfileScreen")}>
+            <Image style={{height: 30, width: 30, marginStart: 20, borderRadius: 15}} source={{uri: "https://api.time.com/wp-content/uploads/2021/02/Demon-Slayer.jpg"}} />
+          </TouchableOpacity>
+          <Feather name="bell" size={20} color={colors.light300} onPress={logout} />
         </View>
       </View>
       <View
@@ -75,8 +81,7 @@ const HomeHeader = (props) => {
         <TextInput
           style={{ fontSize: 15, color: "white" }}
           placeholderTextColor={colors.light100}
-          value={search}
-          onChange={setSearch}
+          onChangeText={(text) => props.search(text)}
           placeholder="What are you looking for?"
         />
         <AntDesign name="search1" size={20} color={colors.light300} />
@@ -90,16 +95,29 @@ const HomeHeader = (props) => {
           marginBottom: 10,
         }}
       >
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <TouchableOpacity
+          style={
+            props.tab === "trending"
+              ? [styles.tabStyle, styles.activeTabStyle]
+              : styles.tabStyle
+          }
+          onPress={() => props.setTab("trending")}
+        >
           <MaterialCommunityIcons
             name="lightbulb-on-outline"
             size={22}
-            color={colors.light100}
+            color={props.tab === "trending" ? colors.accent : colors.light100}
           />
-          <Subheading style={{ marginStart: 10, color: "white" }}>
+          <Subheading
+            style={
+              props.tab === "trending"
+                ? [styles.tabTextStyle, { color: colors.accent }]
+                : styles.tabTextStyle
+            }
+          >
             Trending
           </Subheading>
-        </View>
+        </TouchableOpacity>
         <View
           style={{
             height: 25,
@@ -108,12 +126,29 @@ const HomeHeader = (props) => {
             marginHorizontal: 30,
           }}
         />
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Entypo name="line-graph" size={20} color={colors.light100} />
-          <Subheading style={{ marginStart: 10, color: "white" }}>
+        <TouchableOpacity
+          style={
+            props.tab === "latest"
+              ? [styles.tabStyle, styles.activeTabStyle]
+              : styles.tabStyle
+          }
+          onPress={() => props.setTab("latest")}
+        >
+          <Entypo
+            name="line-graph"
+            size={20}
+            color={props.tab === "latest" ? colors.accent : colors.light100}
+          />
+          <Subheading
+            style={
+              props.tab === "latest"
+                ? [styles.tabTextStyle, { color: colors.accent }]
+                : styles.tabTextStyle
+            }
+          >
             Latest
           </Subheading>
-        </View>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -121,4 +156,21 @@ const HomeHeader = (props) => {
 
 export default HomeHeader;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  tabStyle: {
+    padding: 5,
+    paddingHorizontal: 10,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  activeTabStyle: {
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    borderRadius: 15,
+  },
+  tabTextStyle: {
+    marginStart: 10,
+    color: "white",
+    fontFamily: "Staatliches_400Regular",
+    letterSpacing: 1.5,
+  },
+});

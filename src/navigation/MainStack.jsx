@@ -14,7 +14,6 @@ import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
 import { SafeAreaView } from "react-native";
 import AppHeader from "../components/molecules/AppHeader";
-import MainTab from "./MainTab";
 import CategoryScreen from "../screens/CategoryScreen";
 import { StatusBar as ExpoStatusBar } from "expo-status-bar";
 import MainDrawer from "./MainDrawer";
@@ -26,6 +25,7 @@ import NewListingScreen from "../screens/NewListingScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import { connect } from "react-redux";
 import { signIn } from "../redux/actions/user";
+import BookmarkScreen from "../screens/BookmarkScreen";
 
 const combinedDefaultTheme = merge(NavigationDefaultTheme, defaultTheme);
 const combinedDarkTheme = merge(NavigationDarkTheme, darkTheme);
@@ -97,6 +97,7 @@ const MainStack = ({ user, token, signInUser }) => {
               <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
               <Stack.Screen name="ChatScreen" component={ChatScreen} />
               <Stack.Screen
+                options={{ headerTitle: "Create Listing" }}
                 name="NewListingScreen"
                 component={NewListingScreen}
               />
@@ -104,6 +105,11 @@ const MainStack = ({ user, token, signInUser }) => {
                 options={{ headerTitle: "Settings" }}
                 name="SettingsScreen"
                 component={SettingsScreen}
+              />
+              <Stack.Screen
+                options={{ headerTitle: "Bookmarked Listings" }}
+                name="BookmarkScreen"
+                component={BookmarkScreen}
               />
             </Stack.Navigator>
           </NavigationContainer>

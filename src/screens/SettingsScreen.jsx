@@ -18,7 +18,10 @@ const SettingsScreen = ({ navigation }) => {
   const { colors } = useTheme();
   const handleLogout = () => {
     AsyncStorage.clear();
-    navigation.navigate("Welcome");
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "Welcome" }],
+    });
   };
   return (
     <View
