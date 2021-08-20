@@ -12,13 +12,13 @@ import {
   Caption,
   Button,
   useTheme,
+  Menu,
 } from "react-native-paper";
 import ImageCarousel from "./ImageCarousel";
-import { Ionicons, AntDesign } from "@expo/vector-icons";
+import { Entypo, AntDesign } from "@expo/vector-icons";
 import {
   baseUrl,
-  bookmarkListing,
-  unbookmarkListing,
+  getReportName,
   likeListing,
   unlikeListing,
 } from "../../requests";
@@ -31,22 +31,28 @@ TimeAgo.addLocale(en);
 TimeAgo.setDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
 
-const { width, height } = Dimensions.get("window");
 const HomeListingItem = ({
   token,
   userId,
   item,
   navigation,
-  bookmarks,
-  update,
+  isAdmin,
+  report,
+  reportType,
+  approveReport,
+  rejectReport
 }) => {
+
   const { colors } = useTheme();
+
   const [like, setLike] = React.useState(item.likedBy.length);
   const [isLiked, setIsLiked] = React.useState(item.likedBy.includes(userId));
   const [isLoading, setIsLoading] = React.useState(false);
-  const [isBookmarked, setIsBookmarked] = React.useState(
-    bookmarks && bookmarks.includes(item._id)
-  );
+
+  const [menuVisible, setMenuVisible] = React.useState(false);
+  const openMenu = () => setMenuVisible(true);
+  const closeMenu = () => setMenuVisible(false);
+
   const handleLike = () => {
     if (!isLoading) {
       setIsLoading(true);
@@ -70,104 +76,113 @@ const HomeListingItem = ({
     }
   };
 
-  const handleBookmark = () => {
-    if (!isLoading) {
-      setIsLoading(true);
-      if (isBookmarked) {
-        unbookmarkListing(token, item._id)
-          .then((res) => {
-            setIsBookmarked(false);
-            update(res.user);
-            setIsLoading(false);
-          })
-          .catch((err) => setIsLoading(false));
-      } else {
-        bookmarkListing(token, item._id)
-          .then((res) => {
-            setIsBookmarked(true);
-            update(res.user);
-            setIsLoading(false);
-          })
-          .catch((err) => console.log(err.reponse));
-      }
-    }
-  };
-
   return (
-    <Surface
-      style={{
-        flex: 1,
-        elevation: 2,
-        backgroundColor: colors.surface,
-        borderRadius: 5,
-      }}
-    >
-      <View
+    <View>
+      <Surface
         style={{
-          flexDirection: "row",
-          alignItems: "center",
-          padding: 8,
-          justifyContent: "space-between",
+          flex: 1,
+          elevation: 2,
+          backgroundColor: colors.surface,
+          borderRadius: 5,
         }}
       >
-        <View style={{ flexDirection: "row" }}>
-          <Image
-            source={{ uri: `${baseUrl}${item.createdBy.avatar}` }}
-            style={{ height: 40, width: 40, borderRadius: 20 }}
-          />
-          <Subheading style={{ marginStart: 8 }}>
-            {`${item.createdBy.name}\n`}
-            <Caption>{timeAgo.format(new Date(item.createdOn))}</Caption>
-          </Subheading>
-        </View>
-        <TouchableOpacity onPress={handleBookmark}>
-          <Ionicons
-            name={isBookmarked ? "bookmark" : "bookmark-outline"}
-            size={24}
-            color={colors.light100}
-          />
-        </TouchableOpacity>
-      </View>
-      <ImageCarousel id={item._id} images={item.images} />
-      <Subheading lineBreakMode="tail" style={{ padding: 8 }}>
-        {item.title}
-      </Subheading>
-      <View
-        style={{
-          padding: 5,
-          paddingHorizontal: 10,
-          flexDirection: "row",
-          justifyContent: "space-between",
-        }}
-      >
-        <TouchableOpacity
-          onPress={handleLike}
-          style={{ flexDirection: "row", alignItems: "center" }}
-        >
-          <AntDesign
-            name={isLiked ? "like1" : "like2"}
-            size={20}
-            color={colors.accent}
-          />
-          <Subheading style={{ marginStart: 5 }}>{like}</Subheading>
-        </TouchableOpacity>
-        <Button
-          compact={true}
-          labelStyle={{
-            fontFamily: "Staatliches_400Regular",
-            fontSize: 18,
-            letterSpacing: 1.5,
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            padding: 8,
+            justifyContent: "space-between",
+            paddingEnd: 14
           }}
-          onPress={() =>
-            navigation.navigate("ListingDetailScreen", {
-              listing: item,
-            })
-          }
         >
-          Details
-        </Button>
-      </View>
-    </Surface>
+          <View style={{ flexDirection: "row" }}>
+            {
+              item.createdBy.avatar && item.createdBy.avatar != "" ? (
+                <Image
+                  source={{ uri: `${baseUrl}${item.createdBy.avatar}` }}
+                  style={{ height: 50, width: 50, borderRadius: 25 }}
+                />
+              ) : (
+                <Image
+                  source={{ uri: `https://hips.hearstapps.com/digitalspyuk.cdnds.net/17/13/1490989105-twitter1.jpg?resize=480:*` }}
+                  style={{ height: 50, width: 50, borderRadius: 25 }}
+                />
+              )
+            }
+            <Subheading style={{ marginStart: 8 }}>
+              {
+                item.createdBy.name && item.createdBy.name != "" ? (
+                  `${item.createdBy.name}\n`
+                ) : (
+                  `Petso User\n`
+                )
+              }
+              <Caption>{timeAgo.format(new Date(item.createdOn))}</Caption>
+            </Subheading>
+          </View>
+          <Menu
+            visible={menuVisible}
+            onDismiss={closeMenu}
+            anchor={<Entypo onPress={openMenu} name="dots-three-horizontal" size={18} color={colors.accent} />}
+          >
+            <Menu.Item onPress={() => {
+              setMenuVisible(false)
+              report("listing", item._id)
+            }} title="Report" />
+            {
+              isAdmin ? <Menu.Item onPress={() => {}} title="Delete" /> : null
+            }
+          </Menu>
+        </View>
+        <ImageCarousel id={item._id} images={item.images} />
+        <View
+          style={{
+            padding: 5,
+            paddingHorizontal: 10,
+            flexDirection: "row",
+            justifyContent: "space-between",
+          }}
+        >
+          <TouchableOpacity
+            onPress={handleLike}
+            style={{ flexDirection: "row", alignItems: "center" }}
+          >
+            <AntDesign
+              name={isLiked ? "like1" : "like2"}
+              size={20}
+              color={colors.accent}
+            />
+            <Subheading style={{ marginStart: 5 }}>{like}</Subheading>
+          </TouchableOpacity>
+          <Button
+            compact={true}
+            labelStyle={{
+              fontFamily: "Staatliches_400Regular",
+              fontSize: 18,
+              letterSpacing: 1.5,
+            }}
+            onPress={() =>
+              navigation.navigate("ListingDetailScreen", {
+                listing: item,
+              })
+            }
+          >
+            Details
+          </Button>
+        </View>
+      </Surface>
+      {
+        reportType ? (
+          <View style={{padding: 8}}>
+            <Subheading>Reported for : {getReportName(reportType)}</Subheading>
+            <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                <Button onPress={approveReport}>Approve Report</Button>
+                <Button onPress={rejectReport}>Reject Report</Button>
+            </View>
+          </View>
+        ) : null
+      }
+    </View>
   );
 };
 

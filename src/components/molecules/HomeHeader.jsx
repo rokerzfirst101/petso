@@ -8,31 +8,26 @@ import {
   Image
 } from "react-native";
 import { Subheading, Title, useTheme } from "react-native-paper";
-import {
-  Feather,
-  AntDesign,
-  Entypo,
-  MaterialCommunityIcons,
-  MaterialIcons,
-} from "@expo/vector-icons";
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { connect } from "react-redux";
+import { baseUrl } from "../../requests";
+import { color } from "react-native-reanimated";
 
 const HomeHeader = (props) => {
   const { colors } = useTheme();
-  const logout = () => {
-    AsyncStorage.clear();
-  }
-
+  
   return (
     <View
       style={{
         elevation: 5,
-        backgroundColor: "#1F456E",
+        // backgroundColor: "#1F456E",
+        backgroundColor: colors.accent,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.8,
         shadowRadius: 2,
-        elevation: 4,
+        elevation: 0,
       }}
     >
       <View
@@ -53,108 +48,32 @@ const HomeHeader = (props) => {
               letterSpacing: 1.5,
             }}
           >
-            PETSO
+            {props.title}
           </Title>
         </View>
         <View style={{ flexDirection: "row", alignItems: 'center' }}>
-          <Feather name="bell" size={20} color={colors.light300} />
+          {/* <Feather name="bell" size={20} color={colors.light300} /> */}
+          {
+            props.doctor && !props.user.access.doctor ? (
+              <MaterialCommunityIcons name="account-plus-outline" size={24} color={colors.light300} onPress={props.onPress} />
+            ) : null
+          }
           <TouchableOpacity onPress={() => props.navigation.navigate("ProfileScreen")}>
-            <Image style={{height: 30, width: 30, marginStart: 20, borderRadius: 15}} source={{uri: "https://api.time.com/wp-content/uploads/2021/02/Demon-Slayer.jpg"}} />
+            <Image source={{uri: props.user && props.user.avatar && props.user.avatar != "" ? `${baseUrl}${props.user.avatar}` : `https://hips.hearstapps.com/digitalspyuk.cdnds.net/17/13/1490989105-twitter1.jpg?resize=480:*`}} style={{height: 30, width: 30, borderRadius: 15, marginStart: 20}} />
           </TouchableOpacity>
-          <Feather name="bell" size={20} color={colors.light300} onPress={logout} />
         </View>
-      </View>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          borderWidth: 1,
-          borderColor: colors.light300,
-          padding: 10,
-          paddingHorizontal: 20,
-          justifyContent: "space-between",
-          borderRadius: 30,
-          marginHorizontal: 25,
-          marginVertical: 12,
-        }}
-      >
-        <TextInput
-          style={{ fontSize: 15, color: "white" }}
-          placeholderTextColor={colors.light100}
-          onChangeText={(text) => props.search(text)}
-          placeholder="What are you looking for?"
-        />
-        <AntDesign name="search1" size={20} color={colors.light300} />
-      </View>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "center",
-          paddingVertical: 10,
-          marginBottom: 10,
-        }}
-      >
-        <TouchableOpacity
-          style={
-            props.tab === "trending"
-              ? [styles.tabStyle, styles.activeTabStyle]
-              : styles.tabStyle
-          }
-          onPress={() => props.setTab("trending")}
-        >
-          <MaterialCommunityIcons
-            name="lightbulb-on-outline"
-            size={22}
-            color={props.tab === "trending" ? colors.accent : colors.light100}
-          />
-          <Subheading
-            style={
-              props.tab === "trending"
-                ? [styles.tabTextStyle, { color: colors.accent }]
-                : styles.tabTextStyle
-            }
-          >
-            Trending
-          </Subheading>
-        </TouchableOpacity>
-        <View
-          style={{
-            height: 25,
-            borderWidth: 0.5,
-            borderColor: colors.light300,
-            marginHorizontal: 30,
-          }}
-        />
-        <TouchableOpacity
-          style={
-            props.tab === "latest"
-              ? [styles.tabStyle, styles.activeTabStyle]
-              : styles.tabStyle
-          }
-          onPress={() => props.setTab("latest")}
-        >
-          <Entypo
-            name="line-graph"
-            size={20}
-            color={props.tab === "latest" ? colors.accent : colors.light100}
-          />
-          <Subheading
-            style={
-              props.tab === "latest"
-                ? [styles.tabTextStyle, { color: colors.accent }]
-                : styles.tabTextStyle
-            }
-          >
-            Latest
-          </Subheading>
-        </TouchableOpacity>
       </View>
     </View>
   );
 };
 
-export default HomeHeader;
+const mapStateToProps = (state) => {
+  return {
+    user: state.userReducer.user
+  }
+}
+
+export default connect(mapStateToProps)(HomeHeader);
 
 const styles = StyleSheet.create({
   tabStyle: {

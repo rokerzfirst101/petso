@@ -1,5 +1,4 @@
 import React from "react";
-import { StatusBar, View } from "react-native";
 import { Provider as PaperProvider } from "react-native-paper";
 import {
   NavigationContainer,
@@ -14,9 +13,8 @@ import LoginScreen from "../screens/LoginScreen";
 import RegisterScreen from "../screens/RegisterScreen";
 import { SafeAreaView } from "react-native";
 import AppHeader from "../components/molecules/AppHeader";
-import CategoryScreen from "../screens/CategoryScreen";
 import { StatusBar as ExpoStatusBar } from "expo-status-bar";
-import MainDrawer from "./MainDrawer";
+import MainBottomTab from "./MainBottomTab";
 import ListingDetailScreen from "../screens/ListingDetailScreen";
 import ProfileScreen from "../screens/ProfileScreen";
 import ChatScreen from "../screens/ChatScreen";
@@ -25,7 +23,12 @@ import NewListingScreen from "../screens/NewListingScreen";
 import SettingsScreen from "../screens/SettingsScreen";
 import { connect } from "react-redux";
 import { signIn } from "../redux/actions/user";
-import BookmarkScreen from "../screens/BookmarkScreen";
+import NewExpertScreen from "../screens/NewExpertScreen";
+import NewQuestionAnswerScreen from "../screens/NewQuestionAnswerScreen";
+import ProfileEditScreen from "../screens/ProfileEditScreen";
+import NewConsultScreen from "../screens/NewConsultScreen";
+import ConsultDetailScreen from "../screens/ConsultDetailScreen";
+import AdminScreen from "../screens/AdminScreen";
 
 const combinedDefaultTheme = merge(NavigationDefaultTheme, defaultTheme);
 const combinedDarkTheme = merge(NavigationDarkTheme, darkTheme);
@@ -59,7 +62,7 @@ const MainStack = ({ user, token, signInUser }) => {
         <PaperProvider theme={theme}>
           <NavigationContainer theme={theme}>
             <Stack.Navigator
-              initialRouteName={user ? "CategoryScreen" : "Welcome"}
+              initialRouteName={user ? "Dashboard" : "Welcome"}
               screenOptions={{
                 header: (props) => <AppHeader {...props} />,
               }}
@@ -82,19 +85,14 @@ const MainStack = ({ user, token, signInUser }) => {
               <Stack.Screen
                 options={{ header: () => null }}
                 name="Dashboard"
-                component={MainDrawer}
-              />
-              <Stack.Screen
-                options={{ header: () => null }}
-                name="CategoryScreen"
-                component={CategoryScreen}
+                component={MainBottomTab}
               />
               <Stack.Screen
                 options={{ headerTitle: " " }}
                 name="ListingDetailScreen"
                 component={ListingDetailScreen}
               />
-              <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
+              <Stack.Screen options={{ header: () => null }} name="ProfileScreen" component={ProfileScreen} />
               <Stack.Screen name="ChatScreen" component={ChatScreen} />
               <Stack.Screen
                 options={{ headerTitle: "Create Listing" }}
@@ -102,14 +100,39 @@ const MainStack = ({ user, token, signInUser }) => {
                 component={NewListingScreen}
               />
               <Stack.Screen
+                options={{ headerTitle: "Create Expert Post" }}
+                name="NewExpertScreen"
+                component={NewExpertScreen}
+              />
+              <Stack.Screen
+                options={{ headerTitle: "Create Q&A Post" }}
+                name="NewQuestionAnswerScreen"
+                component={NewQuestionAnswerScreen}
+              />
+              <Stack.Screen
                 options={{ headerTitle: "Settings" }}
                 name="SettingsScreen"
                 component={SettingsScreen}
               />
               <Stack.Screen
-                options={{ headerTitle: "Bookmarked Listings" }}
-                name="BookmarkScreen"
-                component={BookmarkScreen}
+                options={{ header: () => null }}
+                name="ProfileEditScreen"
+                component={ProfileEditScreen}
+              />
+              <Stack.Screen
+                options={{ headerTitle: " " }}
+                name="NewConsultScreen"
+                component={NewConsultScreen}
+              />
+              <Stack.Screen
+                options={{ headerTitle: " " }}
+                name="ConsultDetailScreen"
+                component={ConsultDetailScreen}
+              />
+              <Stack.Screen
+                options={{ headerTitle: "Admin Panel" }}
+                name="AdminScreen"
+                component={AdminScreen}
               />
             </Stack.Navigator>
           </NavigationContainer>
